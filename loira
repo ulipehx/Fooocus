@@ -1,0 +1,34 @@
+# Certifique-se de instalar as dependências, se ainda não o fez:
+# pip install diffusers[torch] transformers
+
+import torch
+from diffusers import StableDiffusionPipeline
+
+# Escolha do modelo (este é um modelo popular; verifique as políticas e termos de uso do modelo escolhido)
+model_id = "CompVis/stable-diffusion-v1-4"
+
+# Carrega o pipeline com o modelo de geração de imagens
+pipe = StableDiffusionPipeline.from_pretrained(
+    model_id,
+    revision="fp16",
+    torch_dtype=torch.float16
+)
+
+# Move o pipeline para a GPU (caso esteja disponível)
+device = "cuda" if torch.cuda.is_available() else "cpu"
+pipe.to(device)
+
+# Define o prompt para gerar a imagem
+prompt = (
+    "beautiful, sexy, blonde, sensual, white female with blue eyes, "
+    "highly detailed portrait, cinematic lighting, digital art style"
+)
+
+# Geração da imagem com um 'guidance scale' para controle de fidelidade à descrição
+with torch.autocast(device):
+    image = pipe(prompt, guidance_scale=7.5).images[0]
+
+# Salva a imagem gerada em um arquivo
+image.save("sexy_girl.png")
+
+print("Imagem gerada e salva como 'sexy_girl.png'")
